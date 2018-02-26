@@ -1,0 +1,28 @@
+.gitignore
+**/README.md
+*.tgz
+*.zip
+
+# Logs
+logs
+*.log
+npm-debug.log
+
+# Runtime data
+pids
+**/*.pid
+**/*.seed
+**/*.hprof
+**/*.tgz
+dist
+
+**/.eslintcache
+**/.editorconfig
+
+#IDE
+**/.idea
+**/.vscode
+
+#OS
+.DS_Store
+.tmp

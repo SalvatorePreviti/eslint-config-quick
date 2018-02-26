@@ -1,0 +1,41 @@
+{
+  "name": "eslint-config-quick",
+  "version": "0.1.0",
+  "description": "Quick eslint configuration",
+  "main": "index.js",
+  "scripts": {
+    "eslint": "node eslint.js"
+  },
+  "bin": {
+    "eslint": "./eslint.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SalvatorePreviti/eslint-config-quick.git"
+  },
+  "keywords": [
+    "eslint",
+    "quick",
+    "configuration"
+  ],
+  "author": "Salvatore Previti",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SalvatorePreviti/eslint-config-quick/issues"
+  },
+  "homepage": "https://github.com/SalvatorePreviti/eslint-config-quick#readme",
+  "devDependencies": {
+    "ajv": "^6.1.1",
+    "eslint": "^4.18.1",
+    "eslint-plugin-import": "^2.9.0",
+    "eslint-plugin-node": "^6.0.1",
+    "eslint-plugin-promise": "^3.6.0"
+  },
+  "peerDependencies": {
+    "ajv": ">=6.1.1",
+    "eslint": ">=4.18.1",
+    "eslint-plugin-import": ">=2.9.0",
+    "eslint-plugin-node": ">=6.0.1",
+    "eslint-plugin-promise": ">=3.6.0"
+  }
+}
