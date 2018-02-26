@@ -7,7 +7,7 @@
     "eslint": "node eslint.js"
   },
   "bin": {
-    "eslint": "./eslint.js"
+    "quick-eslint": "./eslint.js"
   },
   "repository": {
     "type": "git",
