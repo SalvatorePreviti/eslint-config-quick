@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "eg2.tslint",
+    "dbaeumer.vscode-eslint",
+    "robertohuertasm.vscode-icons",
+    "pflannery.vscode-versionlens"
+  ]
+}

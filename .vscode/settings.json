@@ -15,7 +15,8 @@
     "**/node_modules": true,
     "**/bower_components": true,
     "**/package-lock.json": true,
-    "**/.eslintcache": true
+    "**/.eslintcache": true,
+    "**/.editorconfig": true
   },
   "[json]": {
     "editor.quickSuggestions": {
