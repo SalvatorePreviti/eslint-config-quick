@@ -1,4 +1,3 @@
-.gitignore
 **/README.md
 *.tgz
 *.zip
@@ -17,7 +16,6 @@ pids
 dist
 
 **/.eslintcache
-**/.editorconfig
 
 #IDE
 **/.idea

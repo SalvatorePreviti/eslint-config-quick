@@ -9,4 +9,6 @@ npm install eslint-config-quick
 ## Usage
 
 To use the ESLint Quick Style shareable config, first run this:
-  quick-eslint init
+```bash
+quick-eslint init
+```
