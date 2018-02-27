@@ -7,7 +7,7 @@
     "eslint": "node eslint.js"
   },
   "bin": {
-    "quick-eslint": "./eslint.js"
+    "quick-eslint": "./quick-eslint.js"
   },
   "repository": {
     "type": "git",
@@ -40,5 +40,8 @@
     "eslint-plugin-import": ">=2.9.0",
     "eslint-plugin-node": ">=6.0.1",
     "eslint-plugin-promise": ">=3.6.0"
+  },
+  "dependencies": {
+    "chalk": "^2.3.1"
   }
 }

@@ -5,6 +5,7 @@
 
 const spawn = require('child_process').spawn
 const rootPath = require('./lib/appRootPath')
+const chalk = require('chalk').default
 
 class ESLintError extends Error {
   constructor(elapsed) {
@@ -40,12 +41,19 @@ function eslint(options = eslint.defaultOptions, callback = null) {
 
   options = Object.assign({}, eslint.defaultOptions, options)
 
+  if (options.stdio === 'inherit') {
+    console.info(`${chalk.gray('ESLint running...')}`)
+  }
+
   const args = [require.resolve('eslint/bin/eslint.js'), '.', ...options.arguments]
 
   for (const extension of options.extensions) {
     args.push('--ext')
     args.push(extension)
   }
+
+  if (!chalk.enabled)
+    args.push('--no-color')
 
   const child = spawn('node', args, {
     stdio: options.stdio,
@@ -58,12 +66,17 @@ function eslint(options = eslint.defaultOptions, callback = null) {
     if (error) {
       if (!(error instanceof Error))
         error = new ESLintError(elapsed)
+
       if (options.stdio === 'inherit')
-        console.error(`${error.name}: ${error.message}`)
+        console.error(`${
+          chalk.redBright.underline.bold(error.name)}${
+          chalk.redBright(':')} ${
+          chalk.redBright(error.message)}\n`)
+
       callback(error)
     } else {
       if (options.stdio === 'inherit')
-        console.info(`eslint OK (${elapsed}ms)`)
+        console.info(`${chalk.green('\nESLint OK')} ${chalk.gray(`(${elapsed}ms)`)}\n`)
       callback(null, elapsed)
     }
   })
@@ -78,7 +91,7 @@ if (require.main === module) {
 
   switch (process.argv[2]) {
     case 'init':
-      require('./lib/eslintInit')()
+      require('./lib/quick-eslint-init')()
       break
 
     default:
