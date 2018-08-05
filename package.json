@@ -1,13 +1,10 @@
 {
   "name": "eslint-config-quick",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Quick eslint configuration",
   "main": "index.js",
   "scripts": {
     "eslint": "node eslint.js"
-  },
-  "bin": {
-    "quick-eslint": "./quick-eslint.js"
   },
   "repository": {
     "type": "git",
