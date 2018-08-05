@@ -8,14 +8,6 @@ An [ESLint](https://eslint.org/) [Shareable Config](http://eslint.org/docs/devel
 npm install eslint-config-quick
 ```
 
-## Usage
-
-To setup the required dependencies and files for the first time, run
-
-```bash
-quick-eslint init
-```
-
 ## License
 
 MIT. Copyright (c) Salvatore Previti.
