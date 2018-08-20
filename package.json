@@ -1,6 +1,6 @@
 {
   "name": "eslint-config-quick",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "Quick eslint configuration",
   "main": "index.js",
   "repository": {
