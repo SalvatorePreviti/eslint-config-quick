@@ -276,7 +276,7 @@
         "before": false
       }
     ],
-    "semi-style": [1, "last"],
+    "semi-style": [1, "first"],
     "valid-jsdoc": 1,
     "valid-typeof": 2,
     "vars-on-top": 2,
