@@ -1,5 +1,5 @@
 {
-  "extends": ["../.eslintrc.json", "../../agnostic/dist/.eslintrc.json"],
+  "extends": ["../../agnostic/dist/.eslintrc.json", "../.eslintrc.json"],
   "rules": {
     "global-require": 0
   }

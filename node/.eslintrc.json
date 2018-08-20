@@ -3,7 +3,6 @@
   "plugins": ["node", "import"],
   "rules": {
     "node/shebang": 0,
-    "import/no-commonjs": 0,
     "import/no-nodejs-modules": 0,
     "import/no-extraneous-dependencies": 1,
     "node/exports-style": [2, "module.exports"],
