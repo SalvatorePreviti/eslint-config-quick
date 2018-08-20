@@ -1,0 +1,3 @@
+{
+  "extends": ["../.eslintrc.json", "../../agnostic/dist/.eslintrc.json"]
+}

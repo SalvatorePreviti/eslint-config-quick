@@ -1,0 +1,11 @@
+{
+  "extends": ["../.eslintrc.json"],
+  "rules": {
+    "no-shadow": 0,
+    "node/exports-style": 0
+  },
+  "env": {
+    "es6": true,
+    "node": true
+  }
+}
