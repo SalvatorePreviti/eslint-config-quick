@@ -1,7 +1,8 @@
 {
-  "extends": ["../../agnostic/dist/.eslintrc.json", "../.eslintrc.json"],
+  "extends": ["../.eslintrc.json"],
   "rules": {
     "no-shadow": 0,
-    "node/exports-style": 0
+    "node/exports-style": 0,
+    "no-console": 0
   }
 }
