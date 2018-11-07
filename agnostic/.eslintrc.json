@@ -2,7 +2,7 @@
   "env": {
     "es6": true
   },
-  "extends": ["eslint:recommended", "prettier"],
+  "extends": ["eslint:recommended", "./_formatting.js"],
   "parserOptions": {
     "ecmaFeatures": {
       "generators": true,
@@ -16,7 +16,6 @@
   "rules": {
     "array-callback-return": 2,
     "arrow-body-style": [0, "as-needed"],
-    "arrow-parens": [0, "as-needed"],
     "block-scoped-var": 2,
     "callback-return": 2,
     "class-methods-use-this": 0,
@@ -217,29 +216,121 @@
     "operator-assignment": [1, "always"],
     "padding-line-between-statements": [
       "warn",
-      { "blankLine": "always", "next": "import", "prev": "let" },
-      { "blankLine": "always", "next": "import", "prev": "var" },
-      { "blankLine": "always", "next": "*", "prev": "directive" },
-      { "blankLine": "always", "next": "*", "prev": "function" },
-      { "blankLine": "always", "next": "function", "prev": "*" },
-      { "blankLine": "always", "next": "*", "prev": "class" },
-      { "blankLine": "always", "next": "class", "prev": "*" },
-      { "blankLine": "always", "next": "export", "prev": "*" },
-      { "blankLine": "always", "next": "*", "prev": "export" },
-      { "blankLine": "always", "next": "cjs-export", "prev": "*" },
-      { "blankLine": "always", "next": "*", "prev": "cjs-export" },
-      { "blankLine": "always", "next": "cjs-import", "prev": "let" },
-      { "blankLine": "always", "next": "cjs-import", "prev": "var" },
-      { "blankLine": "always", "next": "cjs-import", "prev": "import" },
-      { "blankLine": "always", "next": "import", "prev": "cjs-import" },
-      { "blankLine": "always", "next": "class", "prev": "cjs-import" },
-      { "blankLine": "always", "next": "function", "prev": "cjs-import" },
-      { "blankLine": "always", "next": "let", "prev": "cjs-import" },
-      { "blankLine": "always", "next": "var", "prev": "cjs-import" },
-      { "blankLine": "always", "next": "class", "prev": "import" },
-      { "blankLine": "always", "next": "function", "prev": "import" },
-      { "blankLine": "always", "next": "let", "prev": "import" },
-      { "blankLine": "always", "next": "var", "prev": "import" }
+      {
+        "blankLine": "always",
+        "next": "import",
+        "prev": "let"
+      },
+      {
+        "blankLine": "always",
+        "next": "import",
+        "prev": "var"
+      },
+      {
+        "blankLine": "always",
+        "next": "*",
+        "prev": "directive"
+      },
+      {
+        "blankLine": "always",
+        "next": "*",
+        "prev": "function"
+      },
+      {
+        "blankLine": "always",
+        "next": "function",
+        "prev": "*"
+      },
+      {
+        "blankLine": "always",
+        "next": "*",
+        "prev": "class"
+      },
+      {
+        "blankLine": "always",
+        "next": "class",
+        "prev": "*"
+      },
+      {
+        "blankLine": "always",
+        "next": "export",
+        "prev": "*"
+      },
+      {
+        "blankLine": "always",
+        "next": "*",
+        "prev": "export"
+      },
+      {
+        "blankLine": "always",
+        "next": "cjs-export",
+        "prev": "*"
+      },
+      {
+        "blankLine": "always",
+        "next": "*",
+        "prev": "cjs-export"
+      },
+      {
+        "blankLine": "always",
+        "next": "cjs-import",
+        "prev": "let"
+      },
+      {
+        "blankLine": "always",
+        "next": "cjs-import",
+        "prev": "var"
+      },
+      {
+        "blankLine": "always",
+        "next": "cjs-import",
+        "prev": "import"
+      },
+      {
+        "blankLine": "always",
+        "next": "import",
+        "prev": "cjs-import"
+      },
+      {
+        "blankLine": "always",
+        "next": "class",
+        "prev": "cjs-import"
+      },
+      {
+        "blankLine": "always",
+        "next": "function",
+        "prev": "cjs-import"
+      },
+      {
+        "blankLine": "always",
+        "next": "let",
+        "prev": "cjs-import"
+      },
+      {
+        "blankLine": "always",
+        "next": "var",
+        "prev": "cjs-import"
+      },
+      {
+        "blankLine": "always",
+        "next": "class",
+        "prev": "import"
+      },
+      {
+        "blankLine": "always",
+        "next": "function",
+        "prev": "import"
+      },
+      {
+        "blankLine": "always",
+        "next": "let",
+        "prev": "import"
+      },
+      {
+        "blankLine": "always",
+        "next": "var",
+        "prev": "import"
+      }
     ],
     "prefer-arrow-callback": [
       "warn",
