@@ -1,5 +1,5 @@
 {
-  "extends": ["../agnostic/.eslintrc.json", "plugin:node/recommended"],
+  "extends": ["../agnostic/.eslintrc.json", "plugin:import/errors", "plugin:import/warnings", "plugin:node/recommended"],
   "plugins": ["node", "import"],
   "rules": {
     "node/shebang": 0,

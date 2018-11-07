@@ -1,10 +1,5 @@
 {
-  "extends": [
-    "../agnostic/.eslintrc.json",
-    "plugin:import/errors",
-    "plugin:import/warnings",
-    "plugin:node/recommended"
-  ],
+  "extends": ["../agnostic/.eslintrc.json", "plugin:import/errors", "plugin:import/warnings", "plugin:node/recommended"],
   "plugins": ["import"],
   "env": {
     "browser": true,
