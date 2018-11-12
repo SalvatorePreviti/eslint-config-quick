@@ -1,5 +1,7 @@
 # Hidden files
-.*
+.vscode
+.npmignore
+.editorconfig
 
 *.tgz
 *.zip

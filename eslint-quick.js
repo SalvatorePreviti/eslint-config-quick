@@ -5,7 +5,7 @@
 const process = require('process')
 const path = require('path')
 const spawn = require('child_process').spawn
-const getRootPath = require('./getRootPath')
+const getAppRootPath = require('./getAppRootPath')
 
 class ESLintOptions {
   constructor() {
@@ -70,7 +70,7 @@ function eslint(options) {
 
   return new Promise((resolve, reject) => {
     const args = generateArguments(options)
-    const child = spawn('node', args, { stdio: options.stdio, cwd: path.resolve(options.appRootPath || getRootPath()) })
+    const child = spawn('node', args, { stdio: options.stdio, cwd: path.resolve(options.appRootPath || getAppRootPath()) })
 
     function handleError(error) {
       if (options.fail === false) {
