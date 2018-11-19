@@ -1,5 +1,5 @@
 const fs = require('fs')
-const getAppRootPath = require('./getAppRootPath')
+const getRootPath = require('./getRootPath')
 
 let hasPrettierCache
 
@@ -14,7 +14,7 @@ function hasPrettier() {
   }
   hasPrettierCache = false
   try {
-    const requireOptions = { paths: [getAppRootPath()] }
+    const requireOptions = { paths: [getRootPath()] }
     const manifestPath = require.resolve('./package.json', requireOptions)
     const manifest = JSON.parse(fs.readFileSync(manifestPath))
     if ((manifest.devDependencies && manifest.devDependencies.prettier) || (manifest.dependencies && manifest.dependencies.prettier)) {
