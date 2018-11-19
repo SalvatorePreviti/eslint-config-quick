@@ -6,8 +6,8 @@
     "import/no-extraneous-dependencies": [
       2,
       {
-        "devDependencies": false,
-        "optionalDependencies": false,
+        "devDependencies": true,
+        "optionalDependencies": true,
         "peerDependencies": false
       }
     ],

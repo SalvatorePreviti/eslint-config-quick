@@ -15,9 +15,9 @@
     "import/no-extraneous-dependencies": [
       2,
       {
-        "devDependencies": true,
-        "optionalDependencies": false,
-        "peerDependencies": false
+        "devDependencies": false,
+        "optionalDependencies": true,
+        "peerDependencies": true
       }
     ]
   },
