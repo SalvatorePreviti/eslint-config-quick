@@ -21,7 +21,11 @@ function resolveFromModule(pathToResolve) {
 
 async function loadText(textPath, options = { throwIfNotFound: false }) {
   try {
-    return await readFile(resolveFromRoot(textPath), 'utf8')
+    let text = (await readFile(resolveFromRoot(textPath), 'utf8')).replace(/\r\n/g, '\n').trimRight()
+    while (text.endsWith('\n')) {
+      text = text.slice(0, text.length - 1).trimRight()
+    }
+    return text
   } catch (e) {
     if (!e || e.code !== 'ENOENT' || options.throwIfNotFound) {
       throw e
@@ -71,15 +75,10 @@ async function writeText(textPath, text, options = { onlyIfNotExists: false }) {
   if (Array.isArray(text)) {
     text = text.join('\n')
   }
-  while (text.endsWith('\n')) {
-    text = text.slice(0, text.length - 1)
-  }
-
   let oldText = await loadText(textPath)
   while (oldText && oldText.endsWith('\n')) {
     oldText = oldText.slice(0, oldText.length - 1)
   }
-
   if (oldText !== text) {
     if (options.onlyIfNotExists) {
       console.warn('- WARNING', getRootPath.shortenPath(textPath), 'skipped, it already exists')
@@ -92,32 +91,57 @@ async function writeText(textPath, text, options = { onlyIfNotExists: false }) {
   }
 }
 
-async function writeJson(jsonPath, content, options = { onlyIfNotExists: false }) {
-  const text = JSON.stringify(sortObjectKeys(content), null, 2)
+async function writeJson(jsonPath, content, options = { sortJson: false, onlyIfNotExists: false }) {
+  if (options.sortJson) {
+    content = sortObjectKeys(content)
+  }
+  const text = JSON.stringify(content, null, 2)
   await writeText(jsonPath, text, options)
 }
 
+async function copyModuleTextFile(relativePath) {
+  if (path.isAbsolute(relativePath)) {
+    throw new TypeError(`copyModuleTextFile: path ${relativePath} cannot be absolute`)
+  }
+  const text = await loadText(resolveFromModule(relativePath), { throwIfNotFound: true })
+  await writeText(resolveFromRoot(relativePath), text, { onlyIfNotExists: true })
+}
+
 async function initPrettierrc() {
-  await writeJson('.prettierrc', {
-    ...((await loadJson('.prettierrc')) || {}),
-    ...(await loadJson(resolveFromModule('.prettierrc'), { throwIfNotFound: true }))
-  })
+  await writeJson(
+    resolveFromRoot('.prettierrc'),
+    {
+      ...((await loadJson(resolveFromRoot('.prettierrc'))) || {}),
+      ...(await loadJson(resolveFromModule('.prettierrc'), { throwIfNotFound: true }))
+    },
+    { sortJson: true }
+  )
 }
 
-async function initPrettierIgnore() {
-  const text = await loadText(resolveFromModule('.prettierrc'), { throwIfNotFound: true })
-  await writeText('.prettierignore', text, { onlyIfNotExists: true })
-}
-
-async function initEditorConfig() {
-  const text = await loadText(resolveFromModule('.editorconfig'), { throwIfNotFound: true })
-  await writeText('.editorconfig', text, { onlyIfNotExists: true })
+async function initEslintrcJson() {
+  let eslintrc = (await loadJson(resolveFromRoot('.prettierrc'))) || {}
+  let oldExtends = []
+  if (Array.isArray(eslintrc.extends)) {
+    oldExtends = [...eslintrc.extends]
+  } else if (eslintrc.extends) {
+    oldExtends = [eslintrc.extends]
+  }
+  if (oldExtends.includes('eslint-config-quick')) {
+    delete eslintrc.extends
+    eslintrc = {
+      extends: ['eslint-config-quick', ...oldExtends],
+      ...eslintrc
+    }
+  }
+  await writeJson(resolveFromRoot('.prettierrc'), eslintrc, { sortJson: false })
 }
 
 async function init() {
-  await initEditorConfig()
+  await copyModuleTextFile('.prettierignore')
+  await copyModuleTextFile('.editorconfig')
+  await copyModuleTextFile('.eslintignore')
   await initPrettierrc()
-  await initPrettierIgnore()
+  await initEslintrcJson()
 }
 
 module.exports = init
