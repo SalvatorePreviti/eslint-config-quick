@@ -92,18 +92,38 @@ function eslint(options) {
   })
 }
 
+function init(options) {
+  return require('./eslint-quick-init')(options)
+}
+
+eslint.init = init
+
 module.exports = eslint
 
 if (require.main === module) {
-  console.info('running eslint')
-  console.time('eslint')
-
-  eslint({ arguments: process.argv.slice(2) })
-    .then(() => {
-      console.timeEnd('eslint')
-    })
-    .catch(() => {
-      console.timeEnd('eslint')
-      process.exit(1)
-    })
+  if (process.argv.includes('--init')) {
+    console.info('eslint-config-quick init')
+    console.time('eslint --init')
+    init({ arguments: process.argv.slice(2) })
+      .then(() => {
+        console.timeEnd('eslint --init')
+      })
+      .catch(e => {
+        console.error(' * eslint --init failed * ')
+        console.error(e)
+        console.timeEnd('eslint --init')
+        process.exit(1)
+      })
+  } else {
+    console.info('running eslint')
+    console.time('eslint')
+    eslint({ arguments: process.argv.slice(2) })
+      .then(() => {
+        console.timeEnd('eslint')
+      })
+      .catch(() => {
+        console.timeEnd('eslint')
+        process.exit(1)
+      })
+  }
 }
