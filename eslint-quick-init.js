@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const getRootPath = require('./getRootPath')
 const path = require('path')
 const util = require('util')
@@ -9,12 +10,12 @@ const writeFile = util.promisify(fs.writeFile)
 
 async function tryLoadText(textPath) {
   try {
-    return await readFile(jsonPath, 'utf8')
+    return await readFile(textPath, 'utf8')
   } catch (e) {
-    if (e && e.code !== 'ENOENT') {
-      return undefined
+    if (!e || e.code !== 'ENOENT') {
+      throw e
     }
-    throw e
+    return undefined
   }
 }
 
@@ -28,11 +29,16 @@ async function mkdirp(dirPath) {
   try {
     await mkdir(dirPath)
   } catch (e) {
-    if (e && e.code === 'ENOENT') {
-      await mkdirp(path.dirname(dirPath))
-      await mkdir(dirPath)
+    if (!e || e.code !== 'ENOENT') {
+      if (e.code === 'EEXIST') {
+        return dirPath
+      }
+      throw e
     }
+    await mkdirp(path.dirname(dirPath))
+    await mkdir(dirPath)
   }
+  return dirPath
 }
 
 function sortObjectKeys(o) {
@@ -50,12 +56,15 @@ function sortObjectKeys(o) {
 }
 
 async function writeJson(jsonPath, content) {
-  const text = JSON.stringify(sortObjectKeys(content), null, 2)
-  const oldText = tryLoadJson(jsonPath)
+  let text = JSON.stringify(sortObjectKeys(content), null, 2)
+  if (!text.endsWith('\n')) {
+    text += '\n'
+  }
+  const oldText = await tryLoadText(jsonPath)
   if (oldText !== text) {
     await mkdirp(path.dirname(jsonPath))
-    await writeFile(jsonPath, text, 'utf8')
-    console.info('-', oldText !== undefined ? 'updated' : 'written', getRootPath.shortenPath(jsonPath)), ',', text.length, 'bytes')
+    await writeFile(jsonPath, text, { encoding: 'utf8', flag: 'w' })
+    console.info('-', oldText !== undefined ? 'updated' : 'written', getRootPath.shortenPath(jsonPath), ',', text.length, 'bytes')
   }
 }
 
@@ -74,10 +83,12 @@ function initPrettierrc() {
   })
 }
 
-function init() {
-  initPrettierrc()
+async function init() {
+  await initPrettierrc()
 }
 
 module.exports = init
 
-tryLoadJson('./xxxx')
+init().catch(e => {
+  console.error(e)
+})
