@@ -211,15 +211,15 @@ async function init(projectRootPath) {
   }
 
   async function initPackageJson() {
-    const rootManifestPath = resolveFromRoot('package.json')
-    let rootManifest = await loadJson(rootManifestPath)
+    const targetManifestPath = resolveFromRoot('package.json')
+    let targetManifest = await loadJson(targetManifestPath)
     let hasRootManifest = true
 
-    const packageName = (rootManifest && rootManifest.name) || path.basename(path.dirname(rootManifestPath))
+    const packageName = (targetManifest && targetManifest.name) || path.basename(path.dirname(targetManifestPath))
 
-    if (rootManifest === undefined) {
+    if (targetManifest === undefined) {
       hasRootManifest = false
-      rootManifest = {
+      targetManifest = {
         name: packageName,
         version: '0.0.0',
         description: packageName,
@@ -233,25 +233,26 @@ async function init(projectRootPath) {
         license: 'MIT'
       }
     }
-    if (!rootManifest.engines) {
-      rootManifest.engines = {}
+    if (!targetManifest.engines) {
+      targetManifest.engines = {}
     }
-    if (!rootManifest.engines.node) {
-      rootManifest.engines.node = '>=8.10.0'
+    if (!targetManifest.engines.node) {
+      targetManifest.engines.node = '>=8.10.0'
     }
-    if (!rootManifest.devDependencies) {
-      rootManifest.devDependencies = {}
+    if (!targetManifest.devDependencies) {
+      targetManifest.devDependencies = {}
     }
 
-    const moduleManifest = await loadJson(resolveFromModule('package.json'), { throwIfNotFound: true })
+    const sourceManifest = await loadJson(resolveFromModule('package.json'), { throwIfNotFound: true })
 
     let dependenciesUpdated = 0
 
-    function updateDependency(name) {
-      let expected =
-        (moduleManifest.devDependencies && moduleManifest.devDependencies[name]) ||
-        (moduleManifest.dependencies && moduleManifest.dependencies[name]) ||
-        (moduleManifest.peerDependencies && moduleManifest.peerDependencies[name])
+    function updateDependency(name, expected) {
+      if (!expected) {
+        expected =
+          (sourceManifest.devDependencies && sourceManifest.devDependencies[name]) ||
+          (sourceManifest.peerDependencies && sourceManifest.peerDependencies[name])
+      }
 
       if (!expected) {
         throw new TypeError(`package ${name} does not exist in ${resolveFromModule('package.json')}`)
@@ -261,9 +262,9 @@ async function init(projectRootPath) {
       }
 
       let existing =
-        (rootManifest.devDependencies && rootManifest.devDependencies[name]) ||
-        (rootManifest.dependencies && rootManifest.dependencies[name]) ||
-        (rootManifest.peerDependencies && rootManifest.peerDependencies[name])
+        (targetManifest.dependencies && targetManifest.dependencies[name]) ||
+        (targetManifest.devDependencies && targetManifest.devDependencies[name]) ||
+        (targetManifest.peerDependencies && targetManifest.peerDependencies[name])
 
       if (existing) {
         if (existing.startsWith('>=')) {
@@ -279,38 +280,40 @@ async function init(projectRootPath) {
         if (!isSemverGreater(expected, existing)) {
           return
         }
-
-        console.warn(`Dependency "${name}" upgraded from version "${existing}" to "${expected}"`)
+        console.warn(`- upgraded package "${name}"  from version "${existing}" to "${expected}"`)
+      } else {
+        console.warn(`- added package "${name}" version "${expected}" added`)
       }
 
       ++dependenciesUpdated
-      rootManifest.devDependencies[name] = expected
+      targetManifest.devDependencies[name] = expected
     }
 
     updateDependency('@types/node')
     updateDependency('prettier')
+    updateDependency(sourceManifest.name, `^${sourceManifest.version}`)
 
-    for (const key of Object.keys(moduleManifest.peerDependencies)) {
+    for (const key of Object.keys(sourceManifest.peerDependencies)) {
       updateDependency(key)
     }
 
-    if (rootManifest.dependencies) {
-      rootManifest.dependencies = sortObjectKeys(rootManifest.dependencies)
+    if (targetManifest.dependencies) {
+      targetManifest.dependencies = sortObjectKeys(targetManifest.dependencies)
     }
 
-    if (rootManifest.devDependencies) {
-      rootManifest.devDependencies = sortObjectKeys(rootManifest.devDependencies)
+    if (targetManifest.devDependencies) {
+      targetManifest.devDependencies = sortObjectKeys(targetManifest.devDependencies)
     }
 
-    if (rootManifest.peerDependencies) {
-      rootManifest.peerDependencies = sortObjectKeys(rootManifest.peerDependencies)
+    if (targetManifest.peerDependencies) {
+      targetManifest.peerDependencies = sortObjectKeys(targetManifest.peerDependencies)
     }
 
     if (!hasRootManifest) {
       console.warn('WARNING - package.json not found, creating one')
     }
 
-    await writeJson(rootManifestPath, rootManifest, { sortJson: false })
+    await writeJson(targetManifestPath, targetManifest, { sortJson: false })
 
     if (!fs.existsSync(resolveFromRoot('node_modules'))) {
       console.warn(`WARNING - node_modules does not exist, run \`npm install\` now`)
