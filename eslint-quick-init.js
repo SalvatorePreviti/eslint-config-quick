@@ -3,7 +3,6 @@ const getRootPath = require('./getRootPath')
 const path = require('path')
 const util = require('util')
 const fs = require('fs')
-const exec = require('child_process').exec
 
 const mkdir = util.promisify(fs.mkdir)
 const readFile = util.promisify(fs.readFile)
@@ -81,12 +80,16 @@ async function init(projectRootPath) {
   }
 
   function mergeJson(origin, add) {
-    if (typeof origin !== typeof add || origin === null || origin === undefined) {
+    if (typeof add !== 'object') {
       return add
     }
-    if (Array.isArray(add) !== Array.isArray(origin)) {
+    if (typeof origin !== 'object' || origin === null) {
       return add
     }
+    if (Array.isArray(origin) !== Array.isArray(add)) {
+      return add
+    }
+
     if (origin[Symbol.iterator]) {
       origin = Array.from(origin)
       const set = new Set(origin.map(x => JSON.stringify(sortObjectKeys(x))))
@@ -97,15 +100,16 @@ async function init(projectRootPath) {
       }
       return origin
     }
+
     for (const key of Object.keys(add)) {
       if (add[key] !== undefined) {
-        origin[key] = mergeJson(add[key])
+        origin[key] = mergeJson(origin[key], add[key])
       }
     }
     return origin
   }
 
-  async function writeText(textPath, text, options = { onlyIfNotExists: false }) {
+  async function writeText(textPath, text, options = { onlyIfNotExists: false, dontWarnIfExists: false }) {
     textPath = resolveFromRoot(textPath)
     if (Array.isArray(text)) {
       text = text.join('\n')
@@ -116,7 +120,9 @@ async function init(projectRootPath) {
     }
     if (oldText !== text) {
       if (options.onlyIfNotExists && oldText !== undefined) {
-        console.warn('- WARNING', getRootPath.shortenPath(textPath), 'skipped, it already exists')
+        if (!options.dontWarnIfExists) {
+          console.warn('- WARNING', getRootPath.shortenPath(textPath), 'skipped, it already exists')
+        }
         return
       }
 
@@ -126,7 +132,7 @@ async function init(projectRootPath) {
     }
   }
 
-  async function writeJson(jsonPath, content, options = { sortJson: false, onlyIfNotExists: false }) {
+  async function writeJson(jsonPath, content, options = { sortJson: false, onlyIfNotExists: false, dontWarnIfExists: false }) {
     if (options.sortJson) {
       content = sortObjectKeys(content)
     }
@@ -134,12 +140,9 @@ async function init(projectRootPath) {
     await writeText(jsonPath, text, options)
   }
 
-  async function copyModuleTextFile(relativePath) {
-    if (path.isAbsolute(relativePath)) {
-      throw new TypeError(`copyModuleTextFile: path ${relativePath} cannot be absolute`)
-    }
-    const text = await loadText(resolveFromModule(relativePath), { throwIfNotFound: true })
-    await writeText(resolveFromRoot(relativePath), text, { onlyIfNotExists: true })
+  async function copyModuleTextFile(sourcePath, targetPath, options = { dontWarnIfExists: false }) {
+    const text = await loadText(resolveFromModule(sourcePath), { throwIfNotFound: true })
+    await writeText(resolveFromRoot(targetPath), text, { ...options, onlyIfNotExists: true })
   }
 
   async function initPrettierrc() {
@@ -172,11 +175,39 @@ async function init(projectRootPath) {
   }
 
   async function initVsCodeSettings() {
-    const rootVsCodeSettingsPath = resolveFromRoot(path.join('.vscode', 'settings.json'))
-    const rootVsCodeSettings = await loadJson(rootVsCodeSettingsPath)
-    const moduleVsCodeSettings = await loadJson(resolveFromModule(path.join('.vscode', 'settings.json')))
-    const newSettings = mergeJson(rootVsCodeSettings, moduleVsCodeSettings)
-    await writeJson(rootVsCodeSettingsPath, newSettings, { sortJson: true })
+    const targetPath = resolveFromRoot(path.join('.vscode', 'settings.json'))
+    const target = await loadJson(targetPath)
+    const source = await loadJson(resolveFromModule(path.join('.vscode', 'settings.json')))
+    await writeJson(targetPath, mergeJson(target, source), { sortJson: true })
+  }
+
+  async function initVsCodeExtensions() {
+    const targetPath = resolveFromRoot(path.join('.vscode', 'extensions.json'))
+    const target = await loadJson(targetPath)
+    const source = await loadJson(resolveFromModule(path.join('.vscode', 'extensions.json')))
+    await writeJson(targetPath, mergeJson(target, source), { sortJson: true })
+  }
+
+  async function isSemverGreater(a, b) {
+    async function parseSemver(v) {
+      while (v && !/^[0-9.*]/.test(v)) {
+        v = v.slice(1)
+      }
+      v.split('.')
+      return [parseInt(v[0], 10), parseInt(v[1], 10), parseInt(v[2], 10)].map(x => (isNaN(x) ? Number.MAX_SAFE_INTEGER : x))
+    }
+
+    a = parseSemver(a)
+    b = parseSemver(b)
+    for (let i = 0; i < 3; ++i) {
+      if (a[i] === b[i]) {
+        break
+      }
+      if (a[i] > b[i]) {
+        return true
+      }
+    }
+    return false
   }
 
   async function initPackageJson() {
@@ -240,13 +271,16 @@ async function init(projectRootPath) {
         } else if (existing.startsWith('~')) {
           existing = `^${existing.slice(1)}`
         }
+
         if (existing === expected) {
           return
         }
-        if (existing !== expected) {
-          console.warn(`Package already has a dependency for "${name}" version "${existing}" but should be "${expected}"`)
+
+        if (!isSemverGreater(expected, existing)) {
           return
         }
+
+        console.warn(`Dependency "${name}" upgraded from version "${existing}" to "${expected}"`)
       }
 
       ++dependenciesUpdated
@@ -288,12 +322,14 @@ async function init(projectRootPath) {
   console.log()
   console.log(`eslint-quick --init ${projectRootPath}`)
 
-  await copyModuleTextFile('.prettierignore')
-  await copyModuleTextFile('.editorconfig')
-  await copyModuleTextFile('.eslintignore')
+  await copyModuleTextFile('.prettierignore', '.prettierignore')
+  await copyModuleTextFile('.editorconfig', '.editorconfig')
+  await copyModuleTextFile('.eslintignore', '.eslintignore')
+  await copyModuleTextFile('.gitignore.default', '.gitignore', { dontWarnIfExists: true })
   await initPrettierrc()
   await initEslintrcJson()
   await initVsCodeSettings()
+  await initVsCodeExtensions()
   await initPackageJson()
 
   console.log('eslint-quick --init ok.')
@@ -301,7 +337,3 @@ async function init(projectRootPath) {
 }
 
 module.exports = init
-
-init('../xxw').catch(e => {
-  console.error(e)
-})

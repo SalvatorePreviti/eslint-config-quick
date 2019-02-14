@@ -1,6 +1,6 @@
 {
   "name": "eslint-config-quick",
-  "version": "0.1.21",
+  "version": "0.1.22",
   "description": "Quick eslint configuration",
   "main": "index.js",
   "repository": {
@@ -30,7 +30,7 @@
     "eslint-plugin-node": ">=8.0.1"
   },
   "devDependencies": {
-    "@types/node": "^10.12.21",
+    "@types/node": "^11.9.3",
     "eslint": "^5.13.0",
     "eslint-plugin-import": "^2.16.0",
     "eslint-plugin-node": "^8.0.1",

@@ -23,10 +23,13 @@
     "**/CVS": true
   },
   "search.exclude": {
+    "**/.gitignore": true,
+    "**/.prettierignore": true,
+    "**/.npmignore": true,
     "**/.editorconfig": true,
     "**/.eslintcache": true,
-    "**/bower_components": true,
     "**/node_modules": true,
+    "**/bower_components": true,
     "**/package-lock.json": true
   }
 }

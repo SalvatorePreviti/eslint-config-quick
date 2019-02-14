@@ -92,8 +92,8 @@ function eslint(options) {
   })
 }
 
-function init(options) {
-  return require('./eslint-quick-init')(options)
+function init(rootPath) {
+  return require('./eslint-quick-init')(rootPath)
 }
 
 eslint.init = init
@@ -101,10 +101,11 @@ eslint.init = init
 module.exports = eslint
 
 if (require.main === module) {
-  if (process.argv.includes('--init')) {
+  const indexOfInit = process.argv.indexOf('--init')
+  if (indexOfInit > 1) {
     console.info('eslint-config-quick init')
     console.time('eslint --init')
-    init({ arguments: process.argv.slice(2) })
+    init(process.argv[indexOfInit + 1])
       .then(() => {
         console.timeEnd('eslint --init')
       })
