@@ -8,24 +8,35 @@ const mkdir = util.promisify(fs.mkdir)
 const readFile = util.promisify(fs.readFile)
 const writeFile = util.promisify(fs.writeFile)
 
-async function tryLoadText(textPath) {
+function resolveFromRoot(pathToResolve) {
+  if (path.isAbsolute(pathToResolve)) {
+    return path.resolve(pathToResolve)
+  }
+  return path.resolve(path.join(getRootPath(), pathToResolve))
+}
+
+function resolveFromModule(pathToResolve) {
+  return path.resolve(path.join(__dirname, pathToResolve))
+}
+
+async function loadText(textPath, options = { throwIfNotFound: false }) {
   try {
-    return await readFile(textPath, 'utf8')
+    return await readFile(resolveFromRoot(textPath), 'utf8')
   } catch (e) {
-    if (!e || e.code !== 'ENOENT') {
+    if (!e || e.code !== 'ENOENT' || options.throwIfNotFound) {
       throw e
     }
     return undefined
   }
 }
 
-async function tryLoadJson(jsonPath) {
-  const text = await tryLoadText(jsonPath)
+async function loadJson(jsonPath, options = { throwIfNotFound: false }) {
+  const text = await loadText(jsonPath, options)
   return text !== undefined ? JSON.parse(text) : undefined
 }
 
 async function mkdirp(dirPath) {
-  dirPath = path.resolve(dirPath)
+  dirPath = resolveFromRoot(dirPath)
   try {
     await mkdir(dirPath)
   } catch (e) {
@@ -55,36 +66,58 @@ function sortObjectKeys(o) {
   return result
 }
 
-async function writeJson(jsonPath, content) {
-  let text = JSON.stringify(sortObjectKeys(content), null, 2)
-  if (!text.endsWith('\n')) {
-    text += '\n'
+async function writeText(textPath, text, options = { onlyIfNotExists: false }) {
+  textPath = resolveFromRoot(textPath)
+  if (Array.isArray(text)) {
+    text = text.join('\n')
   }
-  const oldText = await tryLoadText(jsonPath)
+  while (text.endsWith('\n')) {
+    text = text.slice(0, text.length - 1)
+  }
+
+  let oldText = await loadText(textPath)
+  while (oldText && oldText.endsWith('\n')) {
+    oldText = oldText.slice(0, oldText.length - 1)
+  }
+
   if (oldText !== text) {
-    await mkdirp(path.dirname(jsonPath))
-    await writeFile(jsonPath, text, { encoding: 'utf8', flag: 'w' })
-    console.info('-', oldText !== undefined ? 'updated' : 'written', getRootPath.shortenPath(jsonPath), ',', text.length, 'bytes')
+    if (options.onlyIfNotExists) {
+      console.warn('- WARNING', getRootPath.shortenPath(textPath), 'skipped, it already exists')
+      return
+    }
+
+    await mkdirp(path.dirname(textPath))
+    await writeFile(textPath, `${text}\n`, { encoding: 'utf8', flag: 'w' })
+    console.info('-', oldText !== undefined ? 'updated' : 'written', getRootPath.shortenPath(textPath), ',', text.length, 'bytes')
   }
 }
 
-function initPrettierrc() {
-  const prettierrcPath = path.join(getRootPath(), '.prettierrc')
-  writeJson(prettierrcPath, {
-    ...(tryLoadJson(prettierrcPath) || {}),
-    bracketSpacing: true,
-    jsxBracketSameLine: false,
-    printWidth: 140,
-    semi: false,
-    singleQuote: true,
-    tabWidth: 2,
-    trailingComma: 'none',
-    useTabs: false
+async function writeJson(jsonPath, content, options = { onlyIfNotExists: false }) {
+  const text = JSON.stringify(sortObjectKeys(content), null, 2)
+  await writeText(jsonPath, text, options)
+}
+
+async function initPrettierrc() {
+  await writeJson('.prettierrc', {
+    ...((await loadJson('.prettierrc')) || {}),
+    ...(await loadJson(resolveFromModule('.prettierrc'), { throwIfNotFound: true }))
   })
 }
 
+async function initPrettierIgnore() {
+  const text = await loadText(resolveFromModule('.prettierrc'), { throwIfNotFound: true })
+  await writeText('.prettierignore', text, { onlyIfNotExists: true })
+}
+
+async function initEditorConfig() {
+  const text = await loadText(resolveFromModule('.editorconfig'), { throwIfNotFound: true })
+  await writeText('.editorconfig', text, { onlyIfNotExists: true })
+}
+
 async function init() {
+  await initEditorConfig()
   await initPrettierrc()
+  await initPrettierIgnore()
 }
 
 module.exports = init
