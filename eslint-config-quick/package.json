@@ -1,7 +1,6 @@
 {
-  "name": "eslint-config-quick-dev",
-  "version": "0.0.0",
-  "private": true,
+  "name": "eslint-config-quick",
+  "version": "0.2.0",
   "description": "Quick eslint configuration",
   "main": "index.js",
   "repository": {
@@ -25,12 +24,16 @@
     "url": "https://github.com/SalvatorePreviti/eslint-config-quick/issues"
   },
   "homepage": "https://github.com/SalvatorePreviti/eslint-config-quick#readme",
-  "dependencies": {
-    "eslint-config-quick": "file:eslint-config-quick",
+  "peerDependencies": {
+    "eslint": ">=5.16.0",
+    "eslint-plugin-import": ">=2.17.1",
+    "eslint-plugin-node": ">=8.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^11.13.4",
     "eslint": "^5.16.0",
     "eslint-plugin-import": "^2.17.1",
     "eslint-plugin-node": "^8.0.1",
-    "@types/node": "^11.13.4",
     "prettier": "^1.17.0"
   }
 }

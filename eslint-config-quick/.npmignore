@@ -1,0 +1,27 @@
+# Hidden files
+.npmignore
+.gitignore
+
+*.tgz
+*.zip
+
+# Logs
+logs
+*.log
+npm-debug.log
+
+# Runtime data
+pids
+**/*.pid
+**/*.seed
+**/*.hprof
+**/*.tgz
+
+**/.eslintcache
+
+#IDE
+**/.idea
+
+#OS
+.DS_Store
+.tmp
